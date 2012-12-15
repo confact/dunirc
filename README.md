@@ -19,6 +19,7 @@ commands:
 ---------
 * /join
 * /nick
+* /topic
 * /connect
 * /close
 * /quit

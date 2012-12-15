@@ -18,3 +18,17 @@
 .msg {
 	width:90%;
 }
+#message {
+	width:70%;
+}
+
+.dropdown-menu {
+	width:100px !important;
+	min-width: 100px !important;
+}
+.dropdown-menu ul {
+	width:100px !important;
+}
+.dropdown-menu li {
+	width:100px !important;
+}

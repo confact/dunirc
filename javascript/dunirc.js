@@ -89,9 +89,25 @@ $(function(){
                 }
                 if(action == "NICK") {
                 	var newnick = userchannel.replace(":","");
-                	users[users.indexOf(nickname)] = newnick;
-                	genereateuserlist();
-                	status(nickname +" changed nick to " + newnick, true);
+                	console.log(nickname);
+                	console.log(newnick);
+                	var snabela = false;
+                	var index = jQuery.inArray(nickname, users);
+                	if(index == -1)
+                	{
+	                	index = jQuery.inArray("@"+nickname, users);
+	                	snabela = true;
+                	}
+                	
+                	console.log(index);
+                	if(index != -1) {
+                		if(snabela) { users[index] = "@" + newnick; } else { users[index] = newnick; }
+                		genereateuserlist();
+                		status(nickname +" changed nick to " + newnick, true);
+                		if(nickname == nick) {
+                			nick = newnick;
+                		}
+                	}
                 }
                 if(action == "PRIVMSG") {
                 	privmsg(nickname, param);
@@ -187,7 +203,7 @@ $(function(){
         var h=today.getHours();
         var m=today.getMinutes();
         var s=today.getSeconds();
-        output( "<tr><td>"+h+":"+m+":"+s +"</td><td> &lt;" + nick+'&gt; </td><td>' + escaped+"</td></tr>");
+        output( "<tr><td>"+h+":"+m+":"+s +"</td><td> &lt;" + nick+'&gt; </td><td id="message">' + escaped+"</td></tr>");
     }
     function status(msg, showclock) {
     	var escaped = msg.replace( /&/, '&amp;', 'g' ).replace( /</, '&lt;', 'g' ).
@@ -197,10 +213,10 @@ $(function(){
 		    var h=today.getHours();
         	var m=today.getMinutes();
         	var s=today.getSeconds();
-        	output( "<tr><td>"+h+":"+m+":"+s +"</td><td></td><td>" + escaped+"</td></tr>");
+        	output( "<tr><td>"+h+":"+m+":"+s +"</td><td COLSPAN='2'>" + escaped+"</td></tr>");
 	    }
 	    else {
-		    output( "<tr><td></td><td></td><td>" + escaped+"</td></tr>");
+		    output( "<tr><td COLSPAN='3'>" + escaped+"</td></tr>");
 	    }
     }
     function output(str) {
@@ -212,7 +228,16 @@ $(function(){
     	users.sort();
     	userlist.html("");
 	    $.each(users, function() { 
-		    userlist.append("<tr><td>"+this+"</td></tr>");
+		    userlist.append('<tr><td><div class="dropdown">'+
+    '<a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html">'+
+    this+
+    '<b class="caret"></b>'+
+    '</a>'+
+    '<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">'+
+    '<li><a href="#">kick</a></li>'+
+    '<li><a href="#">ban</a></li>'+
+    '</ul>'+
+    '</div></td></tr>');
   		});
     }
     
@@ -271,6 +296,14 @@ $(function(){
 	            close();
             } else if(input.val().substring(0, 8) == "/connect" || input.val().substring(0, 7) == "/server" && closed) {
 	            wsconnect();
+            } else if(input.val().substring(0, 8) == "/topic" || input.val().substring(0, 7) == "/title") {
+            	var paramer = "";
+            	var array = input.val().split(" ");
+            	for(var i = 1;i<array.length;i++)
+            	{
+            			paramer += array[i] + " ";
+            	}
+	            send( 'topic ' + paramer + '\n' );
             } else {
                 send( 'privmsg ' + ch + ' :' + input.val() + '\n' );
                 privmsg(nick, input.val());
