@@ -296,14 +296,14 @@ $(function(){
 	            close();
             } else if(input.val().substring(0, 8) == "/connect" || input.val().substring(0, 7) == "/server" && closed) {
 	            wsconnect();
-            } else if(input.val().substring(0, 8) == "/topic" || input.val().substring(0, 7) == "/title") {
+            } else if(input.val().substring(0, 6) == "/topic" || input.val().substring(0, 6) == "/title") {
             	var paramer = "";
             	var array = input.val().split(" ");
             	for(var i = 1;i<array.length;i++)
             	{
             			paramer += array[i] + " ";
             	}
-	            send( 'topic ' + paramer + '\n' );
+	            send( 'topic ' +ch+ ' :' + paramer + '\n' );
             } else {
                 send( 'privmsg ' + ch + ' :' + input.val() + '\n' );
                 privmsg(nick, input.val());
