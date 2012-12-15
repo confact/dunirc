@@ -6,6 +6,7 @@ $(function(){
   
   var input = $(".msg");
   var log = $("#content");
+  var logdiv = $(".content");
   var userlist = $("#userlist");
   var topic = $("#topic");
   var closed = false;
@@ -204,7 +205,7 @@ $(function(){
     }
     function output(str) {
             log.append(str);
-            log.scrollTop(log.height());
+            logdiv.scrollTop(logdiv.height());
     }
     
     function genereateuserlist() {
