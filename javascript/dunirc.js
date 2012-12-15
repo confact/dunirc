@@ -22,11 +22,11 @@ $(function(){
 
   
   function wsconnect() {
-            status('websocket connecting...',false);
+            status('connecting...',false);
             ws = new WebSocket("ws://localhost:8089", "base64");
 
             ws.onopen = function() {
-                status( 'websocket connected\n',false);
+                status( 'connected\n',false);
                 retries = 0;
                 //ws.send( 'JOIN ' + ch +'\n' );
                 //output( 'send: JOIN ' + ch + '\n' );
@@ -63,7 +63,6 @@ $(function(){
                 }
                 if(param != undefined && param.indexOf("MODE "+nick+" :+i") != -1) {
                 	send( 'JOIN ' + ch +'\n' );
-                	status( 'joining ' + ch, false);
                 }
                 if(action == "JOIN" && nickname == nick) {
                 	mejoin(e);
@@ -83,9 +82,20 @@ $(function(){
 	                users.splice(users.indexOf(nickname), 1);
 	                genereateuserlist();
                 }
+                if(action == "TOPIC") {
+                	topic.text(ch+": "+param);
+                		status("topic changed to: " + param + "(by " + nickname + ")");
+                }
+                if(action == "NICK") {
+                	var newnick = userchannel.replace(":","");
+                	users[users.indexOf(nickname)] = newnick;
+                	genereateuserlist();
+                	status(nickname +" changed nick to " + newnick, true);
+                }
                 if(action == "PRIVMSG") {
                 	privmsg(nickname, param);
                 }
+                
             };
             ws.onclose = function() {
                 status( 'websocket disconnected', false);
@@ -98,7 +108,7 @@ $(function(){
     
     function mejoin(e) {
     	var foundit = false;
-	    status("joined " + ch, false);
+	    var topicvar = "";
         console.log("Fixing userlist");
         var newmsg = e.split("\r\n:");
         newmsg = newmsg[1].split(" ");
@@ -111,13 +121,14 @@ $(function(){
         else {
         	if(newmsg[3] != "=" && newmsg[3] != "@")
         	{
-            	topic.text("");
+            	topic.text(ch+": ");
+            	
             	for(var i = 4;i<newmsg.length;i++)
             	{
-                			topic.append(newmsg[i].replace(":", "") + " ");
+                			topicvar += newmsg[i].replace(":", "") + " ";
                 			
                 }
-                status("Topic: "+topic.text(),false);
+                topic.append(topicvar);
                 var newmsg2 = e.split("\r\n:");
                 newmsg2 = newmsg2[2].split(" ");
                 console.log(newmsg2);
@@ -152,6 +163,12 @@ $(function(){
 		                user = user.replace(":", "");
 		                users.push(user);
 		                
+	     }
+	     if(topicvar != "") {
+		     status("joined " + ch + " - Topic: "+topicvar, false);
+	     }
+	     else {
+	     	status("joined " + ch, false);
 	     }
 	     genereateuserlist();
     }
@@ -246,7 +263,6 @@ $(function(){
                 part();
                 ch = variable;
                 send( 'JOIN ' + ch + '\n' );
-                status( 'joining ' + ch + '\n',false );
                 console.log(RegExp.$1 + " - ch: " + ch);
             } else if ( input.val().substring(0, 5) == "/join") {
             

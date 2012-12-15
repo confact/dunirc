@@ -3,7 +3,7 @@ dunirc 0.0.1
 
 A HTML5 irc-client, made with websocket and websockify.
 
-support for autojoin, privmsg channel, topic, join, userlist, part.
+support for autojoin, privmsg channel, topic, join, userlist, part, nick.
 
 upcoming support: mode, kick and quit.
 
@@ -18,6 +18,7 @@ Good to know
 commands:
 ---------
 * /join
+* /nick
 * /connect
 * /close
 * /quit
