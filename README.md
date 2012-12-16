@@ -45,7 +45,6 @@ commands:
 Good to know
 ------------
 * Tested mostly on a unrealircd server and a little on QuakeNet.
-* nick and channel is set in the ircclient.js, this will be fixed as a jQuery lib soon.
 * Only tested on firefox 16.0.2 so far.
 
 Known Bugs
