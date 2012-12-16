@@ -293,20 +293,18 @@
     	var escaped = msg.replace( /&/, '&amp;', 'g' ).replace( /</, '&lt;', 'g' ).
                 replace( />/, '&gt;', 'g' ).replace( /"/, '&quot;', 'g' );
 	    var today=new Date();
-        var h=today.getHours();
-        var m=today.getMinutes();
-        var s=today.getSeconds();
-        output( "<tr><td>"+h+":"+m+":"+s +"</td><td> &lt;" + nick+'&gt; </td><td id="message">' + escaped+"</td></tr>");
+	    dateFormat.masks.hammerTime = 'HH:MM:ss';
+        today = today.format("hammerTime");
+        output( "<tr><td>"+today.toString() +"</td><td> &lt;" + nick+'&gt; </td><td id="message">' + escaped+"</td></tr>");
     }
     function status(msg, showclock) {
     	var escaped = msg.replace( /&/, '&amp;', 'g' ).replace( /</, '&lt;', 'g' ).
                 replace( />/, '&gt;', 'g' ).replace( /"/, '&quot;', 'g' );
 	    if(showclock) {
 		    var today=new Date();
-		    var h=today.getHours();
-        	var m=today.getMinutes();
-        	var s=today.getSeconds();
-        	output( "<tr><td>"+h+":"+m+":"+s +"</td><td COLSPAN='2'>" + escaped+"</td></tr>");
+		    dateFormat.masks.hammerTime = 'HH:MM:ss';
+		    today = today.format("hammerTime");
+        	output( "<tr><td>"+today.toString() +"</td><td COLSPAN='2'>" + escaped+"</td></tr>");
 	    }
 	    else {
 		    output( "<tr><td COLSPAN='3'>" + escaped+"</td></tr>");
@@ -316,7 +314,6 @@
         log.append(str);
         if(options.scroll) {
         	var offsettopp = logdiv[0].scrollHeight;
-        	console.log(offsettopp);
             logdiv.scrollTop(offsettopp);
         }
     }
