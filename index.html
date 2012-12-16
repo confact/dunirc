@@ -12,26 +12,14 @@
 	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 	<link href="stylesheet/style.css" rel="stylesheet">
 	<script src="javascript/dunirc.js"></script>
+	<script type="text/javascript">
+	$(function(){
+		$("#dunirc").dunirc();
+	});
+	</script>
 </head>
 <body>
-	<div class="container">
-	<div class="span12" id="header"></div>
-	<div class="span10" id="topic">No topic</div>
-	<div class="row">
-		<div class="span9 content">
-			<table class="table table-striped">
-				<tbody id="content">
-				</tbody>
-			</table>
-		</div>
-		<div class="span2 userlist">
-			<table class="table table-striped">
-				<tbody id="userlist">
-				</tbody>
-			</table>
-		</div>
-	</div>
-	<div class="write"><form action="#" id="msg"><input type="text" value="" class="msg" /></form></div>
+	<div class="container" id="dunirc">
 	</div>
 </body>
 </html>

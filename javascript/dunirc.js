@@ -1,14 +1,29 @@
 /**
- * Place your JS-code here.
+ * dunirc jQuery plugin
  */
-$(function(){
+(function(){
   'use strict';
   
-  var input = $(".msg");
-  var log = $("#content");
-  var logdiv = $(".content");
-  var userlist = $("#userlist");
-  var topic = $("#topic");
+  $.fn.dunirc = function(options) {
+  
+  var defaults = {
+	  nick: "dun2",
+	  channel: "#test",
+	  userlist: "userlist",
+	  content: "content",
+	  msg: ".msg",
+	  topic: "topic",
+	  scroll: true
+  };
+  
+  var options = $.extend(defaults, options);
+  
+  
+  var input;
+  var log;
+  var logdiv;
+  var userlist;
+  var topic;
   var closed = false;
   var ws, timer;
   var users = new Array();
@@ -16,11 +31,83 @@ $(function(){
 
   var retries = 0;  
   var inlogcheck = true;
-  
-  //Settings
-  var nick = "dun2";
-  var ch = '#test'; 
 
+
+  return this.each(function () {
+  	 var obj = $(this);
+  	 var topics = $("<div>").addClass("span10").attr('id', 'topic');
+  	 topics.text("No Topic");
+  	 
+  	 var row = $("<div>").addClass("row");
+  	 var content = $("<div>").addClass("span9 "+options.content);
+  	 var contentTable = '<table class="table table-striped"><tbody id="'+options.content+'"></tbody></table>';
+  	 content.append(contentTable);
+  	 var userlistdiv = $("<div>").addClass("span2 "+options.userlist);
+  	 var userTable = '<table class="table table-striped"><tbody id="'+options.userlist+'"></tbody></table>';
+  	 userlistdiv.append(userTable);
+  	 
+  	 var msg = '<div class="write"><form action="#" id="'+options.msg.replace(".","").replace("#","")+'"><input type="text" value="" class="'+options.msg.replace(".","").replace("#","")+'" /></form></div>';
+  	 
+  	 row.append(content);
+  	 row.append(userlistdiv);
+  	 
+  	 obj.html(topics);
+  	 obj.append(row);
+  	 obj.append(msg);
+  	 //setup the objs
+  	 input = $(options.msg);
+  	 log = $("#"+options.content);
+  	 logdiv = $("."+options.content);
+  	 userlist = $("#"+options.userlist);
+  	 topic = $("#"+options.topic);
+  	 
+  	 //fix input
+  	 input.keypress(function(event) {
+      if (event.which == 13) {
+        event.preventDefault();
+    		if ( input.val() == '' )
+                return;
+            if ( input.val().match( /^\/nick (.*)/i ) ) {
+            	options.nick = RegExp.$1;
+                send( 'nick ' + options.nick + '\n' );
+            } else if ( input.val().match( /^\/quote (.*)/i ) ) {
+                send( RegExp.$1 + '\n' );
+                output( 'raw send: ' + RegExp.$1 + '\n' );
+            } else if ( input.val().match( /^\/quit(.*)/i ) ) {
+                send( 'quit :' + (RegExp.$1 || 'Shagadelic') + '\n' );
+            } else if ( input.val().substring(0, 5) == "/join") {
+            	var variable = input.val().split(" ")[1];
+                part();
+               options.channel= variable;
+                send( 'JOIN ' +options.channel+ '\n' );
+                console.log(RegExp.$1 + " - ch: " + options.channel);
+            } else if ( input.val().substring(0, 5) == "/join") {
+            
+            } else if(input.val().substring(0, 6) == "/close" || input.val().substring(0, 5) == "/quit") {
+	            close();
+            } else if(input.val().substring(0, 8) == "/connect" || input.val().substring(0, 7) == "/server" && closed) {
+	            wsconnect();
+            } else if(input.val().substring(0, 6) == "/topic" || input.val().substring(0, 6) == "/title") {
+            	var paramer = "";
+            	var array = input.val().split(" ");
+            	for(var i = 1;i<array.length;i++)
+            	{
+            			paramer += array[i] + " ";
+            	}
+	            send( 'topic ' +options.channel+ ' :' + paramer + '\n' );
+            } else {
+                send( 'privmsg ' +options.channel+ ' :' + input.val() + '\n' );
+                privmsg(options.nick, input.val());
+            }
+            input.val('');
+            try{ input.focus(); } catch(e) { };
+       }
+     });
+  	 
+  	 //fix the last thign and start the conenction
+	 input.focus();
+     wsconnect();
+  });
   
   function wsconnect() {
             status('connecting...',false);
@@ -29,8 +116,8 @@ $(function(){
             ws.onopen = function() {
                 status( 'connected\n',false);
                 retries = 0;
-                //ws.send( 'JOIN ' + ch +'\n' );
-                //output( 'send: JOIN ' + ch + '\n' );
+                //ws.send( 'JOIN ' +options.channel+'\n' );
+                //output( 'send: JOIN ' +options.channel+ '\n' );
             };
             ws.onmessage = function(content) {
             	var e = window.atob(content.data);
@@ -55,36 +142,36 @@ $(function(){
                 }
                 if(e.indexOf("Found your hostname") != -1 || e.indexOf("No Ident response") != -1) {
                 	if(inlogcheck) {
-	                	send( 'NICK '+nick+' \n');
-	                	send( 'USER '+nick+' banankorv MP  : dunirc \n');
+	                	send( 'NICK '+options.nick+' \n');
+	                	send( 'USER '+options.nick+' banankorv MP  : dunirc \n');
 	                	status( 'Identifying',false );
 	                	serverurl = server;
 	                	inlogcheck = false;
 	                }
                 }
-                if(param != undefined && param.indexOf("MODE "+nick+" :+i") != -1) {
-                	send( 'JOIN ' + ch +'\n' );
+                if(param != undefined && param.indexOf("MODE "+options.nick+" :+i") != -1) {
+                	send( 'JOIN ' + options.channel +'\n' );
                 }
-                if(action == "JOIN" && nickname == nick) {
+                if(action == "JOIN" && nickname == options.nick) {
                 	mejoin(e);
                 	
-                } else if(action == "JOIN" && nickname != nick) {
-                	status( nickname + " joined " + ch,false);
+                } else if(action == "JOIN" && nickname != options.nick) {
+                	status( nickname + " joined " + options.channel,false);
 	                users.push(nickname);
 	                genereateuserlist();
                 }
-                if(action == "PART" && nickname != nick) {
+                if(action == "PART" && nickname != options.nick) {
                 	if(param != undefined) {
-	                	status(nickname + " lefted " + ch +": "+param, false);
+	                	status(nickname + " lefted " +options.channel+": "+param, false);
                 	}
                 	else {
-	                	status(nickname + " lefted " + ch, false);
+	                	status(nickname + " lefted " + options.channel, false);
                 	}
 	                users.splice(users.indexOf(nickname), 1);
 	                genereateuserlist();
                 }
                 if(action == "TOPIC") {
-                	topic.text(ch+": "+param);
+                	topic.text(options.channel+": "+param);
                 		status("topic changed to: " + param + "(by " + nickname + ")");
                 }
                 if(action == "NICK") {
@@ -104,8 +191,8 @@ $(function(){
                 		if(snabela) { users[index] = "@" + newnick; } else { users[index] = newnick; }
                 		genereateuserlist();
                 		status(nickname +" changed nick to " + newnick, true);
-                		if(nickname == nick) {
-                			nick = newnick;
+                		if(nickname == options.nick) {
+                			options.nick = newnick;
                 		}
                 	}
                 }
@@ -131,14 +218,14 @@ $(function(){
         newmsg = newmsg[1].split(" ");
         console.log(newmsg);
         if(newmsg[1] == "MODE") {
-	        status("created " + ch +" with this options: " + newmsg[3], false);
+	        status("created " +options.channel+" with this options: " + newmsg[3], false);
 	        var newmsg = e.split("\r\n:");
 	         	newmsg = newmsg[2].split(" ");
         }
         else {
         	if(newmsg[3] != "=" && newmsg[3] != "@")
         	{
-            	topic.text(ch+": ");
+            	topic.text(options.channel+": ");
             	
             	for(var i = 4;i<newmsg.length;i++)
             	{
@@ -182,10 +269,10 @@ $(function(){
 		                
 	     }
 	     if(topicvar != "") {
-		     status("joined " + ch + " - Topic: "+topicvar, false);
+		     status("joined " +options.channel+ " - Topic: "+topicvar, false);
 	     }
 	     else {
-	     	status("joined " + ch, false);
+	     	status("joined " + options.channel, false);
 	     }
 	     genereateuserlist();
     }
@@ -220,8 +307,10 @@ $(function(){
 	    }
     }
     function output(str) {
-            log.append(str);
+        log.append(str);
+        if(options.scroll) {
             logdiv.scrollTop(logdiv.height());
+        }
     }
     
     function genereateuserlist() {
@@ -249,8 +338,8 @@ $(function(){
     }
     
     function part() {
-	    send( 'part ' + ch + '\n' );
-        status( 'lefted ' + ch + '\n',false );
+	    send( 'part ' +options.channel+ '\n' );
+        status( 'lefted ' +options.channel+ '\n',false );
         users = new Array();
     }
     
@@ -268,50 +357,5 @@ $(function(){
     	var msg = window.btoa(data);
 	    ws.send(msg);
     }
-    
-    
-    
-    input.keypress(function(event) {
-      if (event.which == 13) {
-        event.preventDefault();
-    		if ( input.val() == '' )
-                return;
-            if ( input.val().match( /^\/nick (.*)/i ) ) {
-            	nick = RegExp.$1;
-                send( 'nick ' + nick + '\n' );
-            } else if ( input.val().match( /^\/quote (.*)/i ) ) {
-                send( RegExp.$1 + '\n' );
-                output( 'raw send: ' + RegExp.$1 + '\n' );
-            } else if ( input.val().match( /^\/quit(.*)/i ) ) {
-                send( 'quit :' + (RegExp.$1 || 'Shagadelic') + '\n' );
-            } else if ( input.val().substring(0, 5) == "/join") {
-            	var variable = input.val().split(" ")[1];
-                part();
-                ch = variable;
-                send( 'JOIN ' + ch + '\n' );
-                console.log(RegExp.$1 + " - ch: " + ch);
-            } else if ( input.val().substring(0, 5) == "/join") {
-            
-            } else if(input.val().substring(0, 6) == "/close" || input.val().substring(0, 5) == "/quit") {
-	            close();
-            } else if(input.val().substring(0, 8) == "/connect" || input.val().substring(0, 7) == "/server" && closed) {
-	            wsconnect();
-            } else if(input.val().substring(0, 6) == "/topic" || input.val().substring(0, 6) == "/title") {
-            	var paramer = "";
-            	var array = input.val().split(" ");
-            	for(var i = 1;i<array.length;i++)
-            	{
-            			paramer += array[i] + " ";
-            	}
-	            send( 'topic ' +ch+ ' :' + paramer + '\n' );
-            } else {
-                send( 'privmsg ' + ch + ' :' + input.val() + '\n' );
-                privmsg(nick, input.val());
-            }
-            input.val('');
-            try{ input.focus(); } catch(e) { };
-       }
-     });
-     input.focus();
-     wsconnect();
-});
+   }
+})(jQuery);

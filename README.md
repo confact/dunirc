@@ -1,4 +1,4 @@
-dunirc 0.0.1
+dunirc 0.0.2
 ============
 
 A HTML5 irc-client, made with websocket and websockify.
@@ -9,11 +9,26 @@ upcoming support: mode, kick and quit.
 
 you can only chat in the channel so far.
 
-Good to know
-------------
-* Tested mostly on a unrealircd server and a little on QuakeNet.
-* nick and channel is set in the ircclient.js, this will be fixed as a jQuery lib soon.
-* Only tested on firefox 16.0.2 so far.
+
+Options
+-------
+in 0.0.2 dunirc is a jQuery plugin, this is how you can use it:
+
+```$("#dunirc").dunirc();
+```
+
+with options:
+```$("#dunirc").dunirc({
+	  nick: "dun2",
+	  channel: "#test",
+	  userlist: "userlist",
+	  content: "content",
+	  msg: ".msg",
+	  topic: "topic",
+	  scroll: true
+  });
+
+```
 
 commands:
 ---------
@@ -23,6 +38,17 @@ commands:
 * /connect
 * /close
 * /quit
+
+Good to know
+------------
+* Tested mostly on a unrealircd server and a little on QuakeNet.
+* nick and channel is set in the ircclient.js, this will be fixed as a jQuery lib soon.
+* Only tested on firefox 16.0.2 so far.
+
+Known Bugs
+----------
+* Issues when changing nick or when a user change nick, to update the userlist.
+* scroll not always working
 
 Requirements
 ------------
