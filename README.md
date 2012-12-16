@@ -14,11 +14,13 @@ Options
 -------
 in 0.0.2 dunirc is a jQuery plugin, this is how you can use it:
 
-```$("#dunirc").dunirc();
+```
+$("#dunirc").dunirc();
 ```
 
 with options:
-```$("#dunirc").dunirc({
+```
+$("#dunirc").dunirc({
 	  nick: "dun2",
 	  channel: "#test",
 	  userlist: "userlist",
