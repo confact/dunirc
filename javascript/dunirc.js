@@ -52,9 +52,7 @@
   	 row.append(content);
   	 row.append(userlistdiv);
   	 
-  	 obj.html(topics);
-  	 obj.append(row);
-  	 obj.append(msg);
+  	 obj.html(topics).append(row).append(msg);
   	 //setup the objs
   	 input = $(options.msg);
   	 log = $("#"+options.content);
@@ -108,6 +106,7 @@
   	 //fix the last thign and start the conenction
 	 input.focus();
      wsconnect();
+     return this;
   });
   
   function wsconnect() {
@@ -229,8 +228,14 @@
             	topic.text(options.channel+": ");
             	
             	for(var i = 4;i<newmsg.length;i++)
-            	{
-                			topicvar += newmsg[i].replace(":", "") + " ";
+            	{			
+            				if(i == 4) {
+	            				topicvar += newmsg[i].replace(":", "") + " ";
+            				}
+            				else {
+	            				topicvar += newmsg[i] + " ";
+            				}
+                			
                 			
                 }
                 topic.append(topicvar);
@@ -310,7 +315,9 @@
     function output(str) {
         log.append(str);
         if(options.scroll) {
-            logdiv.scrollTop(logdiv.height());
+        	var offsettopp = logdiv[0].scrollHeight;
+        	console.log(offsettopp);
+            logdiv.scrollTop(offsettopp);
         }
     }
     

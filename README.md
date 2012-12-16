@@ -51,7 +51,6 @@ Good to know
 Known Bugs
 ----------
 * Issues when changing nick or when a user change nick, to update the userlist.
-* scroll not always working
 
 Requirements
 ------------
