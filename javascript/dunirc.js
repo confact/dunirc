@@ -7,6 +7,7 @@
   $.fn.dunirc = function(options) {
   
   var defaults = {
+  	  server: "ws://localhost:8089",
 	  nick: "dun2",
 	  channel: "#test",
 	  userlist: "userlist",
@@ -111,7 +112,7 @@
   
   function wsconnect() {
             status('connecting...',false);
-            ws = new WebSocket("ws://localhost:8089", "base64");
+            ws = new WebSocket(options.server, "base64");
 
             ws.onopen = function() {
                 status( 'connected\n',false);

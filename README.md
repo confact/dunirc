@@ -21,6 +21,7 @@ $("#dunirc").dunirc();
 with options:
 ```
 $("#dunirc").dunirc({
+  	  server: "ws://localhost:8089",
 	  nick: "dun2",
 	  channel: "#test",
 	  userlist: "userlist",
