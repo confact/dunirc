@@ -3,9 +3,9 @@
  */
 (function(){
   'use strict';
-  
+
   $.fn.dunirc = function(options) {
-  
+
   var defaults = {
   	  server: "ws://localhost:8089",
 	  nick: "dun2",
@@ -16,10 +16,10 @@
 	  topic: "topic",
 	  scroll: true
   };
-  
+
   var options = $.extend(defaults, options);
-  
-  
+
+
   var input;
   var log;
   var logdiv;
@@ -30,7 +30,7 @@
   var users = new Array();
   var serverurl;
 
-  var retries = 0;  
+  var retries = 0;
   var inlogcheck = true;
 
 
@@ -38,7 +38,7 @@
   	 var obj = $(this);
   	 var topics = $("<div>").addClass("span10").attr('id', 'topic');
   	 topics.text("No Topic");
-  	 
+
   	 var row = $("<div>").addClass("row");
   	 var content = $("<div>").addClass("span9 "+options.content);
   	 var contentTable = '<table class="table table-striped"><tbody id="'+options.content+'"></tbody></table>';
@@ -46,12 +46,12 @@
   	 var userlistdiv = $("<div>").addClass("span2 "+options.userlist);
   	 var userTable = '<table class="table table-striped"><tbody id="'+options.userlist+'"></tbody></table>';
   	 userlistdiv.append(userTable);
-  	 
+
   	 var msg = '<div class="write"><form action="#" id="'+options.msg.replace(".","").replace("#","")+'"><input type="text" value="" class="'+options.msg.replace(".","").replace("#","")+'" /></form></div>';
-  	 
+
   	 row.append(content);
   	 row.append(userlistdiv);
-  	 
+
   	 obj.html(topics).append(row).append(msg);
   	 //setup the objs
   	 input = $(options.msg);
@@ -59,7 +59,7 @@
   	 logdiv = $("."+options.content);
   	 userlist = $("#"+options.userlist);
   	 topic = $("#"+options.topic);
-  	 
+
   	 //fix input
   	 input.keypress(function(event) {
       if (event.which == 13) {
@@ -81,7 +81,7 @@
                 send( 'JOIN ' +options.channel+ '\n' );
                 console.log(RegExp.$1 + " - ch: " + options.channel);
             } else if ( input.val().substring(0, 5) == "/join") {
-            
+
             } else if(input.val().substring(0, 6) == "/close" || input.val().substring(0, 5) == "/quit") {
 	            close();
             } else if(input.val().substring(0, 8) == "/connect" || input.val().substring(0, 7) == "/server" && closed) {
@@ -102,13 +102,13 @@
             try{ input.focus(); } catch(e) { };
        }
      });
-  	 
+
   	 //fix the last thign and start the conenction
 	 input.focus();
      wsconnect();
      return this;
   });
-  
+
   function wsconnect() {
             status('connecting...',false);
             ws = new WebSocket(options.server, "base64");
@@ -120,7 +120,9 @@
                 //output( 'send: JOIN ' +options.channel+ '\n' );
             };
             ws.onmessage = function(content) {
-            	var e = window.atob(content.data);
+                var aMyUTF8Output = base64DecToArr(content.data);
+                var e = UTF8ArrToStr(aMyUTF8Output);
+
             	var array = e.split(" ");
             	var server = array[0];
             	var nickname = array[0].split("!")[0].replace(":", "");
@@ -154,7 +156,7 @@
                 }
                 if(action == "JOIN" && nickname == options.nick) {
                 	mejoin(e);
-                	
+
                 } else if(action == "JOIN" && nickname != options.nick) {
                 	status( nickname + " joined " + options.channel,false);
 	                users.push(nickname);
@@ -185,7 +187,7 @@
 	                	index = jQuery.inArray("@"+nickname, users);
 	                	snabela = true;
                 	}
-                	
+
                 	console.log(index);
                 	if(index != -1) {
                 		if(snabela) { users[index] = "@" + newnick; } else { users[index] = newnick; }
@@ -199,7 +201,7 @@
                 if(action == "PRIVMSG") {
                 	privmsg(nickname, param);
                 }
-                
+
             };
             ws.onclose = function() {
                 status( 'websocket disconnected', false);
@@ -209,7 +211,7 @@
                 clearTimeout(timer);
                 timer = setInterval( ping, 100000 );
     }
-    
+
     function mejoin(e) {
     	var foundit = false;
 	    var topicvar = "";
@@ -226,17 +228,17 @@
         	if(newmsg[3] != "=" && newmsg[3] != "@")
         	{
             	topic.text(options.channel+": ");
-            	
+
             	for(var i = 4;i<newmsg.length;i++)
-            	{			
+            	{
             				if(i == 4) {
 	            				topicvar += newmsg[i].replace(":", "") + " ";
             				}
             				else {
 	            				topicvar += newmsg[i] + " ";
             				}
-                			
-                			
+
+
                 }
                 topic.append(topicvar);
                 var newmsg2 = e.split("\r\n:");
@@ -265,14 +267,14 @@
 	         	}
 	        }
 	     }
-                	
+
 	     for(var i = 5;i<newmsg.length;i++)
 	     {
 		                var user = newmsg[i];
 		                console.log(user);
 		                user = user.replace(":", "");
 		                users.push(user);
-		                
+
 	     }
 	     if(topicvar != "") {
 		     status("joined " +options.channel+ " - Topic: "+topicvar, false);
@@ -283,12 +285,12 @@
 	     genereateuserlist();
     }
     function retryOpeningWebSocket(){
-    	if (retries < 2 && !closed) {            
-        	setTimeout(wsconnect, 1000);            
+    	if (retries < 2 && !closed) {
+        	setTimeout(wsconnect, 1000);
         	retries++;
         }
     }
-    
+
     function privmsg(nick, msg) {
     	var escaped = msg.replace( /&/, '&amp;', 'g' ).replace( /</, '&lt;', 'g' ).
                 replace( />/, '&gt;', 'g' ).replace( /"/, '&quot;', 'g' );
@@ -317,11 +319,11 @@
             logdiv.scrollTop(offsettopp);
         }
     }
-    
+
     function genereateuserlist() {
     	users.sort();
     	userlist.html("");
-	    $.each(users, function() { 
+	    $.each(users, function() {
 		    userlist.append('<tr><td><div class="dropdown">'+
     '<a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html">'+
     this+
@@ -334,20 +336,20 @@
     '</div></td></tr>');
   		});
     }
-    
+
     function ping() {
             if (ws.readyState === undefined || ws.readyState > 1) {
             	 output("keeping connection alive");
 	             send( '' );
-            }  
+            }
     }
-    
+
     function part() {
 	    send( 'part ' +options.channel+ '\n' );
         status( 'lefted ' +options.channel+ '\n',false );
         users = new Array();
     }
-    
+
     function close() {
     	inlogcheck = true;
     	closed = true;
@@ -357,10 +359,11 @@
 	    ws.close();
 	    status( 'disconnected \n',false );
     }
-    
+
     function send(data) {
-    	var msg = window.btoa(data);
-	    ws.send(msg);
+        var aMyUTF8Input = strToUTF8Arr(data);
+        var sMyBase64 = base64EncArr(aMyUTF8Input);
+	ws.send(sMyBase64);
     }
    }
 })(jQuery);
