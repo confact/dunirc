@@ -120,10 +120,10 @@
                 //output( 'send: JOIN ' +options.channel+ '\n' );
             };
             ws.onmessage = function(content) {
-                var aMyUTF8Output = base64DecToArr(content.data);
-                var e = UTF8ArrToStr(aMyUTF8Output);
+                var messageOutputUTF8 = base64DecToArr(content.data);
+                var messageoutput = UTF8ArrToStr(messageOutputUTF8);
 
-            	var array = e.split(" ");
+            	var array = messageoutput.split(" ");
             	var server = array[0];
             	var nickname = array[0].split("!")[0].replace(":", "");
             	var action = array[1];
@@ -135,7 +135,7 @@
             			param += array[i] + " ";
             		}
             	}
-            	console.log(e);
+            	console.log(messageoutput);
             	console.log(action);
             	console.log(param);
                 if ( e.match( /^PING (\S*)/i ) ) {
@@ -361,9 +361,9 @@
     }
 
     function send(data) {
-        var aMyUTF8Input = strToUTF8Arr(data);
-        var sMyBase64 = base64EncArr(aMyUTF8Input);
-	ws.send(sMyBase64);
+        var messageinputUTF8 = strToUTF8Arr(data);
+        var messageData64 = base64EncArr(messageinputUTF8);
+	ws.send(messageData64);
     }
    }
 })(jQuery);
